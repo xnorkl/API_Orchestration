@@ -1,0 +1,148 @@
+{
+    "clicksBlocked": [],
+    "clicksPermitted": [],
+    "messagesBlocked": [
+        {
+            "GUID": "uIxE-CQpNTuyC88ftqBlgb5tMuCjfgvi",
+            "QID": "31x289afqw-1",
+            "ccAddresses": [],
+            "cluster": "monhealthsys_hosted",
+            "completelyRewritten": false,
+            "fromAddress": [
+                "ec0c02c2884ec60d59cb38ec711e34f4@kakinuma-s.jp"
+            ],
+            "headerFrom": "=?UTF-8?B?V0ZQb3J0YWwgV2VsbHMgRW1haWwgPHBvcnRhbC5lbWFpbEBlbm90aWZpY2F0aW9ucy5md2VsbHMuY29tPg==?= <hikaru@kakinuma-s.jp>",
+            "headerReplyTo": null,
+            "impostorScore": 0.0,
+            "malwareScore": 0,
+            "messageID": "<e17ee84ad0f9b30049ed846c8b29e956@localhost.localdomain>",
+            "messageParts": [
+                {
+                    "contentType": "text/html",
+                    "disposition": "inline",
+                    "filename": "text.html",
+                    "md5": "da0adf0dc43f2be55db509afac3fa1a4",
+                    "oContentType": "text/html",
+                    "sandboxStatus": null,
+                    "sha256": "c7fc9b6bec67f60a3c759107904768ebb4a9bb9ff9a914c0e648fdfa9779b8a5"
+                }
+            ],
+            "messageSize": 20999,
+            "messageTime": "2020-06-30T12:38:22.000Z",
+            "modulesRun": [
+                "access",
+                "smtpsrv",
+                "av",
+                "spf",
+                "dkimv",
+                "sandbox",
+                "spam",
+                "dmarc",
+                "pdr",
+                "urldefense"
+            ],
+            "phishScore": 100,
+            "policyRoutes": [
+                "default_inbound"
+            ],
+            "quarantineFolder": "Phish",
+            "quarantineRule": "module.spam.rule.inbound_phish",
+            "recipient": [
+                "mlockwood@prestonmemorial.org"
+            ],
+            "replyToAddress": [],
+            "sender": "ec0c02c2884ec60d59cb38ec711e34f4@kakinuma-s.jp",
+            "senderIP": "112.78.125.158",
+            "spamScore": 100,
+            "subject": "=?UTF-8?B?VG8gY29uZmlybSB5b3VyIFdlbGxzIGVucm9sbG1lbnQsIHlvdSBtdXN0IFNpZ24gT24gYmVmb3JlIDAxIEp1bHksIDIwMjA=?=",
+            "threatsInfoMap": [
+                {
+                    "campaignID": null,
+                    "classification": "phish",
+                    "threat": "http://kidswishhero.org/recontinuetsmo",
+                    "threatID": "05307a9bb723fc58eab4d64f286c00ffe6c5f02e7aa40dc477103b3a0130e331",
+                    "threatStatus": "active",
+                    "threatTime": "2020-06-30T12:06:07.000Z",
+                    "threatType": "url",
+                    "threatUrl": "https://threatinsight.proofpoint.com/abe988f7-6e04-80dd-be41-f0c21aa8b7a9/threat/email/05307a9bb723fc58eab4d64f286c00ffe6c5f02e7aa40dc477103b3a0130e331"
+                }
+            ],
+            "toAddresses": [
+                "mlockwood@prestonmemorial.org"
+            ],
+            "xmailer": "PHPMailer 5.2.1 (http://code.google.com/a/apache-extras.org/p/phpmailer/)"
+        },
+        {
+            "GUID": "47IUkjRwoh_obeZwzwbaEJXxrPYeuAkp",
+            "QID": "31x289aej9-1",
+            "ccAddresses": [],
+            "cluster": "monhealthsys_hosted",
+            "completelyRewritten": false,
+            "fromAddress": [
+                "5a1c6b081c32a9eb3c94eb103a1dbe34@virtual-muography-institute.org"
+            ],
+            "headerFrom": "=?UTF-8?B?V0ZQb3J0YWwgV2VsbHMgRW1haWwgPHBvcnRhbC5lbWFpbEBlbm90aWZpY2F0aW9ucy5md2VsbHMuY29tPg==?= <hayashi@virtual-muography-institute.org>",
+            "headerReplyTo": null,
+            "impostorScore": 0.0,
+            "malwareScore": 0,
+            "messageID": "<6c9ffb08428b488f44c89b68f7943c6e@localhost.localdomain>",
+            "messageParts": [
+                {
+                    "contentType": "text/html",
+                    "disposition": "inline",
+                    "filename": "text.html",
+                    "md5": "da0adf0dc43f2be55db509afac3fa1a4",
+                    "oContentType": "text/html",
+                    "sandboxStatus": null,
+                    "sha256": "c7fc9b6bec67f60a3c759107904768ebb4a9bb9ff9a914c0e648fdfa9779b8a5"
+                }
+            ],
+            "messageSize": 20872,
+            "messageTime": "2020-06-30T12:02:22.000Z",
+            "modulesRun": [
+                "access",
+                "smtpsrv",
+                "av",
+                "spf",
+                "dkimv",
+                "sandbox",
+                "spam",
+                "dmarc",
+                "pdr",
+                "urldefense"
+            ],
+            "phishScore": 0,
+            "policyRoutes": [
+                "default_inbound"
+            ],
+            "quarantineFolder": "Spam Definite",
+            "quarantineRule": "module.spam.rule.inbound_spam_definite",
+            "recipient": [
+                "mlockwood@prestonmemorial.org"
+            ],
+            "replyToAddress": [],
+            "sender": "5a1c6b081c32a9eb3c94eb103a1dbe34@virtual-muography-institute.org",
+            "senderIP": "153.126.178.217",
+            "spamScore": 100,
+            "subject": "=?UTF-8?B?VG8gY29uZmlybSB5b3VyIFdlbGxzIGVucm9sbG1lbnQsIHlvdSBtdXN0IFNpZ24gT24gYmVmb3JlIDAxIEp1bHksIDIwMjA=?=",
+            "threatsInfoMap": [
+                {
+                    "campaignID": null,
+                    "classification": "phish",
+                    "threat": "http://kidswishhero.org/recontinuetsmo",
+                    "threatID": "05307a9bb723fc58eab4d64f286c00ffe6c5f02e7aa40dc477103b3a0130e331",
+                    "threatStatus": "active",
+                    "threatTime": "2020-06-30T12:06:07.000Z",
+                    "threatType": "url",
+                    "threatUrl": "https://threatinsight.proofpoint.com/abe988f7-6e04-80dd-be41-f0c21aa8b7a9/threat/email/05307a9bb723fc58eab4d64f286c00ffe6c5f02e7aa40dc477103b3a0130e331"
+                }
+            ],
+            "toAddresses": [
+                "mlockwood@prestonmemorial.org"
+            ],
+            "xmailer": "PHPMailer 5.2.1 (http://code.google.com/a/apache-extras.org/p/phpmailer/)"
+        }
+    ],
+    "messagesDelivered": [],
+    "queryEndTime": "2020-06-30T13:17:00Z"
+}
