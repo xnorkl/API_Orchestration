@@ -1,13 +1,38 @@
 import sys
 import datetime
+import config
+import configparser
 from enum import Enum
 import json
 import requests
 import pprint
 import re
+import hashlib
 
 
-class Util:
+class API_Block():
+
+    def __init__(self, index, stamp, stash, phash):
+        self.index = index
+        self.stamp = stamp
+        self.stash = stash
+        self.phash = phash
+        self.hash = self.hash()
+
+    def hash(self):
+        key = hashlib.sha256()
+        key.update(str(self.index).encode('utf-8'))
+        key.update(str(self.stamp).encode('utf-8'))
+        key.update(str(self.stash).encode('utf-8'))
+        key.update(str(self.phash).encode('utf-8'))
+        return key.hexdigest()
+
+
+
+class API(object):
+    ''' Here to access methods needed accross API classes '''
+    def __init__(self):
+        self.last_hour = self.last_hour()
 
     def last_hour(self):
         ''' Return last hour in ISO 8601 format. '''
@@ -17,14 +42,14 @@ class Util:
         return min_delta.replace(microsecond=0).isoformat() + 'Z'
 
 
-
-class Proofpoint(Util):
+class Proofpoint(API):
     '''Proofpoint API request. Returns JSON output. '''
 
-    ## Configs ##
+    ## Class Variables ##
+    #
+    T   = API().last_hour
     # Root URL for all Proofpoint API calls.
     URL = 'https://tap-api-v2.proofpoint.com/v2/siem/'
-    T   = last_hour()
     # Credentials are generated at the TAP server.
     PRINCIPAL   = "a737f3cb-8c8e-d873-086b-270540dcab5d"
     SECRET      = "f298519077c461d214e9b615e8c3515e35f5b1079a73c90f62caacf9ddacddf0"
@@ -40,8 +65,8 @@ class Proofpoint(Util):
     def siem(call, delta_t=T, creds=CREDS, url=URL):
         ''' Defines a payload provided by the SIEM API. Returns JSON '''
         # Handle enum types:
-        if not isinstance(call, siem_call):
-            raise TypeError('call must be an instance of siem_call enum')
+        #if not isinstance(call, siem_call):
+        #    raise TypeError('call must be an instance of siem_call enum')
 
         siem_payload = {
             'format': 'json',
@@ -49,17 +74,17 @@ class Proofpoint(Util):
             'threatStatus': ['active', 'cleared']
         }
 
-        if call.value == 'clicks_blocked':
+        if call is clicks_blocked:
             url = url + 'clicks/blocked'
-        elif call.value == 'clicks_permitted':
+        elif call == 'clicks_permitted':
             url = url + 'clicks/permitted'
-        elif call.value == 'messages_blocked':
+        elif call == 'messages_blocked':
             url = url + 'messages/blocked'
-        elif call.value == 'messages_delivered':
+        elif call == 'messages_delivered':
             url = url + 'messages/delivered'
-        elif call.value == 'issues':
+        elif call == 'issues':
             url = url + 'issues'
-        elif call.value == 'all':
+        elif call == 'all':
             url = url + 'all'
         else:
             raise TypeError('call must be an instance of siem_call enum') # Redundancy
