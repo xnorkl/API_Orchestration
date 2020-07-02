@@ -1,6 +1,5 @@
 import sys
 import datetime
-import config
 import configparser
 from enum import Enum
 import json
@@ -8,7 +7,16 @@ import requests
 import pprint
 import re
 import hashlib
+from abc import ABC, abstractmethod
+from Config import *
 
+
+def delta_t():
+    ''' Return last hour in ISO 8601 format. '''
+
+    now = datetime.datetime.utcnow()
+    min_delta = now - datetime.timedelta(seconds=3600)
+    return min_delta.replace(microsecond=0).isoformat() + 'Z'
 
 class API_Block():
 
@@ -28,63 +36,63 @@ class API_Block():
         return key.hexdigest()
 
 
+class API(ABC):
+    ''' An Abstract API class '''
 
-class API(object):
-    ''' Here to access methods needed accross API classes '''
     def __init__(self):
-        self.last_hour = self.last_hour()
+        self.interval = delta_t()
+        super().__init__()
 
-    def last_hour(self):
-        ''' Return last hour in ISO 8601 format. '''
-
-        now = datetime.datetime.utcnow()
-        min_delta = now - datetime.timedelta(seconds=3600)
-        return min_delta.replace(microsecond=0).isoformat() + 'Z'
-
+    @abstractmethod
+    def credentials(self):
+        pass
 
 class Proofpoint(API):
     '''Proofpoint API request. Returns JSON output. '''
 
-    ## Class Variables ##
-    #
-    T   = API().last_hour
-    # Root URL for all Proofpoint API calls.
-    URL = 'https://tap-api-v2.proofpoint.com/v2/siem/'
-    # Credentials are generated at the TAP server.
-    PRINCIPAL   = "a737f3cb-8c8e-d873-086b-270540dcab5d"
-    SECRET      = "f298519077c461d214e9b615e8c3515e35f5b1079a73c90f62caacf9ddacddf0"
-    CREDS       = (PRINCIPAL, SECRET)
+    def __init__(self):
+        self.url = PP_URL
+        self.creds = self.credentials()
+        super().__init__()
 
-    ## Generate API Payloads ##
+    def credentials(self):
+        return (PP_KEY,PP_SEC)
+
     # Enumerate calls for the siem api.
     siem_call = Enum(
         'siem_call',
-        'clicks_blocked clicks_permitted messages_blocked messages_delivered issues all'
+        'clicks_blocked clicks_permitted messages_blocked messages_delivered issues everything'
     )
 
-    def siem(call, delta_t=T, creds=CREDS, url=URL):
+    ## Generate API Payloads #
+
+    @classmethod
+    def siem(cls, call):
         ''' Defines a payload provided by the SIEM API. Returns JSON '''
-        # Handle enum types:
-        #if not isinstance(call, siem_call):
-        #    raise TypeError('call must be an instance of siem_call enum')
+
+        # Create Class Instance
+        self = cls()
+        url   = self.url
+        delta = self.interval
+        creds = self.creds
 
         siem_payload = {
             'format': 'json',
-            'sinceTime': delta_t,
+            'sinceTime': delta ,
             'threatStatus': ['active', 'cleared']
         }
 
-        if call is clicks_blocked:
+        if call is self.siem_call.clicks_blocked:
             url = url + 'clicks/blocked'
-        elif call == 'clicks_permitted':
+        elif call is self.siem_call.clicks_permitted:
             url = url + 'clicks/permitted'
-        elif call == 'messages_blocked':
+        elif call is self.siem_call.messages_blocked:
             url = url + 'messages/blocked'
-        elif call == 'messages_delivered':
+        elif call is self.siem_call.messages_delivered:
             url = url + 'messages/delivered'
-        elif call == 'issues':
+        elif call is self.siem_call.issues:
             url = url + 'issues'
-        elif call == 'all':
+        elif call is self.siem_call.everything:
             url = url + 'all'
         else:
             raise TypeError('call must be an instance of siem_call enum') # Redundancy
@@ -94,7 +102,8 @@ class Proofpoint(API):
 
         return siem_r.json()
 
-    def forensics(creds):
+    @classmethod
+    def forensics(cls, creds):
         ''' Defines a payload provided by the Forensics API. Returns JSON '''
 
         forensics_payload = {
@@ -108,7 +117,8 @@ class Proofpoint(API):
         )
         return forensics_r.json()
 
-    def people(creds):
+    @classmethod
+    def people(cls, creds):
         ''' Defines a payload provided by the Poeple API. Returns JSON.'''
 
         people_payload = {'window': 90}
@@ -156,12 +166,11 @@ class Proofpoint(API):
             return user['identity']['emails'][0]
 
 
-CALL = Proofpoint.siem_call.messages_blocked
 pp = Proofpoint()
+call = pp.siem_call.everything
+report = pp.siem(call)
 
-pp.siem(CALL)
-
-print(pp)
+print(report)
 #       answer = str(report['fromAddress'][0]) + '\n'
 #       with open("blocklist.txt", 'a') as outfile:
 #           outfile.write(answer)
