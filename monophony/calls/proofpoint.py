@@ -1,14 +1,25 @@
-import sys
 import datetime
-import configparser
 from enum import Enum
-import json
 import requests
-import pprint
 import re
-import hashlib
-from abc import ABC, abstractmethod
-from docs/config import *
+from abc import ABC, ABCMeta, abstractmethod
+import config as conf
+
+# Enumerate APIs.
+class api(Enum):
+    SIEM = 'siem'
+    People = 'people'
+    Forensics = 'forensics'
+    Campaign = 'campagn'
+
+# Enumerate calls for the siem api.
+class event(Enum):
+    clickblocked = 'clicks_blocked'
+    clickspermitted = 'clicks_permitted'
+    messagesblocked = 'messages_blocked'
+    messagesdelivered = 'messages_delivered'
+    issues = 'issues'
+    everything = 'all'
 
 
 def delta_t():
@@ -18,92 +29,60 @@ def delta_t():
     min_delta = now - datetime.timedelta(seconds=3600)
     return min_delta.replace(microsecond=0).isoformat() + 'Z'
 
-class API_Block():
 
-    def __init__(self, index, stamp, stash, phash):
-        self.index = index
-        self.stamp = stamp
-        self.stash = stash
-        self.phash = phash
-        self.hash = self.hash()
-
-    def hash(self):
-        key = hashlib.sha256()
-        key.update(str(self.index).encode('utf-8'))
-        key.update(str(self.stamp).encode('utf-8'))
-        key.update(str(self.stash).encode('utf-8'))
-        key.update(str(self.phash).encode('utf-8'))
-        return key.hexdigest()
-
-
-class API(ABC):
-    ''' An Abstract API class '''
-
+class Request(object, metaclass=ABCMeta):
+    ''' Abstract API Class. '''
     def __init__(self):
-        self.interval = delta_t()
+        self.apicall = self.rooturl()
+        self.apicred = self.credentials()
+        self.tperiod = delta_t()
         super().__init__()
+
+    @abstractmethod
+    def rooturl(self):
+        pass
 
     @abstractmethod
     def credentials(self):
         pass
 
-class Proofpoint(API):
+class Proofpoint(Request):
     '''Proofpoint API request. Returns JSON output. '''
 
-    def __init__(self):
-        self.url = PP_URL
-        self.creds = self.credentials()
-        super().__init__()
+    def rooturl(self):
+        return (conf.PP_URL)
 
     def credentials(self):
-        return (PP_KEY,PP_SEC)
+        return (conf.PP_KEY, conf.PP_SEC)
 
-    # Enumerate calls for the siem api.
-    siem_call = Enum(
-        'siem_call',
-        'clicks_blocked clicks_permitted messages_blocked messages_delivered issues everything'
-    )
-
-    ## Generate API Payloads #
-
-    @classmethod
-    def siem(cls, call):
-        ''' Defines a payload provided by the SIEM API. Returns JSON '''
-
-        # Create Class Instance
-        self = cls()
-        url   = self.url
-        delta = self.interval
-        creds = self.creds
-
+    # Generate API Payloads #
+    def siem(self, call):
         siem_payload = {
             'format': 'json',
-            'sinceTime': delta ,
-            'threatStatus': ['active', 'cleared']
+            'sinceTime': self.tperiod,
+            'threatStatus': ['active']
         }
 
-        if call is self.siem_call.clicks_blocked:
-            url = url + 'clicks/blocked'
-        elif call is self.siem_call.clicks_permitted:
-            url = url + 'clicks/permitted'
-        elif call is self.siem_call.messages_blocked:
-            url = url + 'messages/blocked'
-        elif call is self.siem_call.messages_delivered:
-            url = url + 'messages/delivered'
-        elif call is self.siem_call.issues:
-            url = url + 'issues'
-        elif call is self.siem_call.everything:
-            url = url + 'all'
+        url = self.apicall + 'siem/'
+        if call is event.clickblocked:
+            url += 'clicks/blocked'
+        elif call is event.clickspermitted:
+            url += 'clicks/permitted'
+        elif call is event.messagesblocked:
+            url += 'messages/blocked'
+        elif call is event.messagesdelivered:
+            siem_url += 'messages/delivered'
+        elif call is event.issues:
+            siem_url += 'issues'
+        elif call is event.everything:
+            siem_url += 'all'
         else:
-            raise TypeError('call must be an instance of siem_call enum') # Redundancy
+            raise TypeError('call must be an instance of siem_call enum')
 
         # Invoke HTML GET Request with the construscted payload.
-        siem_r = requests.get(url,params=siem_payload,auth=creds)
+        return requests.get(url,params=siem_payload,auth=self.apicred)
 
-        return siem_r.json()
-
-    @classmethod
-    def forensics(cls, creds):
+    def forensics(self):
         ''' Defines a payload provided by the Forensics API. Returns JSON '''
 
         forensics_payload = {
@@ -117,8 +96,7 @@ class Proofpoint(API):
         )
         return forensics_r.json()
 
-    @classmethod
-    def people(cls, creds):
+    def people(self):
         ''' Defines a payload provided by the Poeple API. Returns JSON.'''
 
         people_payload = {'window': 90}
@@ -167,7 +145,7 @@ class Proofpoint(API):
 
 
 pp = Proofpoint()
-call = pp.siem_call.everything
+call = event.clickblocked
 report = pp.siem(call)
 
 print(report)
