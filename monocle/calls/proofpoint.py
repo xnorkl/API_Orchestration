@@ -8,7 +8,7 @@ import pprint
 import re
 import hashlib
 from abc import ABC, abstractmethod
-from Config import *
+from docs/config import *
 
 
 def delta_t():
