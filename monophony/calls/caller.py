@@ -34,6 +34,8 @@ def member(a,b):
     """ Takes a value a & returns if a is an element of b. """
     if a in set(elem.value for elem in b):
         return a
+    else:
+        raise TypeError('{} is not a member of {}'.format(a,b))
 
 
 def evoke(m, o):
@@ -41,19 +43,14 @@ def evoke(m, o):
     return getattr(globals()[m], o)
 
 
-def evoke_api(m, f, args):
-    """ Takes a function f(args) of module m & returns f() if f is an api in m. """
-    if member(f, evoke(m, 'Api')):
-        return helper(evoke(m, f), args)
-
 def helper(f, args):
-    """ Takes a function f and an iterable args and returns f(args).
+    """ Helper fucntion that takes a function f and an object args and returns f(args).
 
     Helper tries to determine first how to unpack if args are an iterable.
     If args are not iterable, helper casts args to list to then unpack.
     This allows for avoiding passing a single argument as an iterable.
-    """
 
+    """
     if isiterable(args):
         if isinstance(args, list) or isinstance(args, tuple):
             return f(*args)
@@ -66,10 +63,15 @@ def helper(f, args):
             raise TypeError('args must be an iterable, not {}'.format(type(args)))
 
 
+def evoke_api(m, f, args):
+    """ Takes a function f(args) of module m & returns f() if f is an api in m. """
+    if member(f, evoke(m, 'Api')):
+        return helper(evoke(m, f), args)
+
+
 def buildurl(m, p, q):
     """ Take a root r and leafs l, q & return str(r/l/q). """
-    print(m, p, q)
-    return '/'.join((evoke(m,'rooturl')(), p, q))
+    return '/'.join((helper(evoke(m,'rooturl')(), p, q))
 
 
 def get(app, api, endpoint, args):
