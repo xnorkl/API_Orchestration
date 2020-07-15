@@ -5,7 +5,7 @@ import re
 
 from caller import get
 
-def access(db='../db/monophony.db'):
+def access(db='monophony.db'):
     conn = sqlite3.connect(db)
     c = conn.cursor()
     return conn, c
@@ -46,3 +46,5 @@ def siem(ep,*args):
 def cycle():
     conn, c = access()
     conn.close()
+
+people()

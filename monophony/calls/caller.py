@@ -1,25 +1,13 @@
-import config
 import requests
-from datetime import datetime as dt, timedelta
-from enums import app,siemendpoint, peopleendpoint
+import json
+from functools import partial
+
+import config
 import pp
+from enums import app,siemendpoint, peopleendpoint
 
-# Generate appropriate timespans.
-def timespan(s):
-    """ Return a timedelta of 1 hours from now. """
-    return dt.utcnow() - timedelta(seconds=s)
+# Higher Order Functions
 
-
-def isoformat(d):
-    """ Take a delta t and output t as ISO 8601. """
-    return d.replace(microsecond=0).isoformat() + 'Z'
-
-
-def lasthour():
-    return isoformat(timespan(3600))
-
-
-# Query and Generate API payloads
 def isiterable(obj):
     """ Check if an object is iterable. If not, ask forgiveness. """
     try:
@@ -43,6 +31,14 @@ def evoke(m, o):
     return getattr(globals()[m], o)
 
 
+def ismember(m, f, a):
+    """ Take a function f(args) in module m & return True or False. """
+    if member(f, evoke(m, a)):
+        return True
+    else:
+        return False
+
+
 def helper(f, args):
     """ Helper fucntion that takes a function f and an object args and returns f(args).
 
@@ -51,30 +47,41 @@ def helper(f, args):
     This allows for avoiding passing a single argument as an iterable.
 
     """
-    if isiterable(args):
-        if isinstance(args, list) or isinstance(args, tuple):
-            return f(*args)
-        if isinstance(args, dict):
-            return f(**args)
-    else:
-        try:
-            return f(*[args])
-        except:
-            raise TypeError('args must be an iterable, not {}'.format(type(args)))
+    try:
+        if callable(f):
+            if isinstance(args, list) or isinstance(args, tuple):
+                return f(*args)
+            if isinstance(args, dict):
+                return f(**args)
+        else:
+             return f(args)
+    except Exception as e:
+        print(e)
 
 
-def evoke_api(m, f, args):
+def call(m, f, *args):
+    """ Takes a module, function, and *args & returns f(*args). """
+    return helper(evoke(m, f), *args)
+
+# API Functions
+
+#Redude arity of higher order functions.
+enumapi = partial(ismember, a='Api')
+rooturl = partial(evoke, o='rooturl') #Why can't this be done with a call?
+
+
+def evoke_api(m, f, *args):
     """ Takes a function f(args) of module m & returns f() if f is an api in m. """
-    if member(f, evoke(m, 'Api')):
-        return helper(evoke(m, f), args)
+    if enumapi(m, f):
+        return call(m, f, args)
 
 
 def buildurl(m, p, q):
     """ Take a root r and leafs l, q & return str(r/l/q). """
-    return '/'.join((helper(evoke(m,'rooturl')(), p, q))
+    return '/'.join((rooturl(m)(), p, q))
 
 
-def get(app, api, endpoint, args):
+def get(app, api, endpoint, *args):
     """ Takes an app, api, and args (where needed). Returns a GET request.
 
     Parameters
@@ -91,34 +98,28 @@ def get(app, api, endpoint, args):
     """
     return requests.get(
         buildurl(app, api, endpoint),
-        params=evoke_api(app, api, args),
+        params=call(app, api, args),
         auth=(config.PP_KEY, config.PP_SEC)
     )
 
-# Create Requests
-# Arguments can be passed in the form of tuples, dicts, or directly, etc...
-# Very Attacked People
-# TODO this will have a command structure...
+"""
+Data Flow
+    get('pp', 'people', 'vap', 14)
+        1) buildurl('pp', 'people', 'vap')
+            buildurl(rooturl('pp')(), 'people', 'vap')
+                buildurl(evoke('pp', rooturl)(), 'people', 'vap')
+                    buildurl(pp.rooturl(), 'people', 'vap')
+        > returns: https://tap-api-v2.proofpoint.com/v2/people/vap
 
-# TODO with helper function and get, build common api commands.
-vap_args = {
-            'app': 'pp',
-            'api': 'people',
-            'endpoint': 'vap',
-            'args': 90
-            }
-
-# Clickes Blocked
-options = (lasthour(), 'active')
-cb_args = (app.PP.value, pp.Api.SIEM.value, siemendpoint.Clicksblocked.value, options)
-
-# Messages Blocked
-mb_args = (app.PP.value, pp.Api.SIEM.value, siemendpoint.Messagesblocked.value, options)
-
-print(helper(get,vap_args))
-#print(get(**vap_args))
-#print(get(*cb_args))
-#print(get(*mb_args))
-#print(pp.SIEM.Clicksblocked.value)
-
-
+    get('pp', 'siem', 'all')
+        2) call('pp','siem')
+            helper(evoke('pp', 'siem'))
+                helper('siem')
+                    siem()
+        > returns: {
+                    'format': 'json',
+                    'sinceTime': '2020-07-09T15:13:53Z',
+                    'threatType': 'url',
+                    'threatStatus': 'active'
+                    }
+"""

@@ -1,9 +1,6 @@
-import config
-from datetime import datetime as dt, timedelta
 from enum import Enum
-import os
-import re
-import requests
+
+from utils import lasthour
 
 # Enumerate Proofpoint APIs and API calls.
 # Enumerators are used similar to Haskell records.
@@ -29,13 +26,20 @@ SIEM = Enum('SIEM',
       }
     )
 
-#TODO Finish adding Enums for all API Endpoints.
+#PP specific functions
 
 def rooturl():
     return 'https://tap-api-v2.proofpoint.com/v2'
 
+def threatid():
+    #TODO: This needs to pull from a db to be effective.
+    pass
 
-def siem(i, f='json', t='url', s='active'):
+def campaignid():
+    #TODO: This needs to pull from a db to be effective.
+    pass
+
+def siem(i=lasthour(), f='json', t='url', s='active'):
     """ Returns a payload for the SIEM API.
 
     Parameters
@@ -77,7 +81,6 @@ def siem(i, f='json', t='url', s='active'):
         - falsePositive
 
     """
-    #TODO list s options
     return {
         'format': f,
         'sinceTime': i,
@@ -118,13 +121,36 @@ def people(w=90, s=1000, p=1):
     }
 
 
-def forensics():
-    """ Returns a Payload for the forensics API. """
-    return {'threatId': get_threatid() }
+def forensics(t=True, i=False):
+    """ Fetch forensic information for a given threat or campaign.
+
+    Required:
+    ---------
+    At least one of
+
+    t (threatId): bool
+        Defaults to True. If True, return threatID(),
+        if False, return campaignID().
+
+    Optional:
+    ---------
+
+    i (includeCampaignForensics) : bool
+        Defaults to False. May optionally be used with the threatId parameter.
+        If false, aggregate forensics for that specific threat identifier will be returned.
+        If true AND if the threat has been associated with a campaign, aggregate forensics
+        for the entire campaign are returned. Otherwise, aggregate forensics for the
+        individual threat are returned.
+
+    """
+    if t:
+        return { 'threatId': threatid(), 'includeCampaignForensics': i }
+    else:
+        return { 'campaignID' : campaignid() }
 
 
 def campaign():
     """ Returns a campaign ID. """
-    return get_campaignid()
+    return campaignid()
 
 
