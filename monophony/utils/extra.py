@@ -1,5 +1,6 @@
 from datetime import datetime as dt, timedelta
 
+
 # Generate appropriate timespans.
 def timespan(s):
     """ Return a timedelta of 1 hours from now. """

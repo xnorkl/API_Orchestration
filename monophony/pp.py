@@ -1,43 +1,40 @@
 from enum import Enum
 
-from utils import lasthour
+from utils.extra import lasthour
 
 # Enumerate Proofpoint APIs and API calls.
 # Enumerators are used similar to Haskell records.
 # These may be removed for tuples or dicts...
-Api = Enum('Api',
-    {
-      'SIEM':'siem',
-      'People':'people',
-      'Foresnics': 'forensics',
-      'Campaign': 'campaign'
-      }
-    )
+Api = Enum('Api', {'SIEM': 'siem',
+                   'People': 'people',
+                   'Foresnics': 'forensics',
+                   'Campaign': 'campaign'})
 
-#TODO This needs to be handled differently....
-SIEM = Enum('SIEM',
-    {
-      'Clicksblocked': 'clicks/blocked',
-      'Clickspermitted': 'clicks/permitted',
-      'Messagesblocked': 'messages/blocked',
-      'Messagesdelivered': 'messages/delivered',
-      'Issues': 'issues',
-      'Everything': 'all'
-      }
-    )
+# TODO This needs to be handled differently....
+SIEM = Enum('SIEM', {'Clicksblocked': 'clicks/blocked',
+                     'Clickspermitted': 'clicks/permitted',
+                     'Messagesblocked': 'messages/blocked',
+                     'Messagesdelivered': 'messages/delivered',
+                     'Issues': 'issues',
+                     'Everything': 'all'})
 
-#PP specific functions
+
+# PP specific functions
+
 
 def rooturl():
     return 'https://tap-api-v2.proofpoint.com/v2'
 
+
 def threatid():
-    #TODO: This needs to pull from a db to be effective.
+    # TODO: This needs to pull from a db to be effective.
     pass
 
+
 def campaignid():
-    #TODO: This needs to pull from a db to be effective.
+    # TODO: This needs to pull from a db to be effective.
     pass
+
 
 def siem(i=lasthour(), f='json', t='url', s='active'):
     """ Returns a payload for the SIEM API.
@@ -90,7 +87,8 @@ def siem(i=lasthour(), f='json', t='url', s='active'):
 
 
 def people(w=90, s=1000, p=1):
-    """ Takes an n-many days w, returns a Payload for the people API.
+    """
+    Takes an n-many days w, returns a Payload for the people API.
 
     Parameters
     ----------
@@ -106,13 +104,13 @@ def people(w=90, s=1000, p=1):
 
     s (size): int
         The maximum number of VAPs to produce in the response.
-        The attackIndex value determine the order of results. Defaults to 1000.
+        The attackIndex value determine the order of results.
+        Defaults to 1000.
 
     p (page): int
         The page of results to return, in multiples of the
-        specified size (or 1000, if no size is explicitly chosen). Defaults to 1.
-
-
+        specified size (or 1000, if no size is explicitly chosen).
+        Defaults to 1.
     """
     return {
         'window': w,
@@ -136,12 +134,12 @@ def forensics(t=True, i=False):
     ---------
 
     i (includeCampaignForensics) : bool
-        Defaults to False. May optionally be used with the threatId parameter.
-        If false, aggregate forensics for that specific threat identifier will be returned.
-        If true AND if the threat has been associated with a campaign, aggregate forensics
-        for the entire campaign are returned. Otherwise, aggregate forensics for the
-        individual threat are returned.
-
+        Defaults to False. May be used with the threatId parameter.
+        If false, forensic data for threat identifier will be returned.
+        If true AND if a threat has been associated with a campaign,
+        forensic data for the entire campaign are returned.
+        If true AND no threat has been assocaitaed with a campaign,
+        forensic data for the individual threat are returned.
     """
     if t:
         return { 'threatId': threatid(), 'includeCampaignForensics': i }
@@ -152,5 +150,3 @@ def forensics(t=True, i=False):
 def campaign():
     """ Returns a campaign ID. """
     return campaignid()
-
-
