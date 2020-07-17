@@ -103,15 +103,16 @@ def get(app, api, endpoint, *args):
     )
 
 """
-Data Flow
-    get('pp', 'people', 'vap', 14)
+Unpacking the get function...
+
+    ex. get('pp', 'people', 'vap', 14)
         1) buildurl('pp', 'people', 'vap')
             buildurl(rooturl('pp')(), 'people', 'vap')
                 buildurl(evoke('pp', rooturl)(), 'people', 'vap')
                     buildurl(pp.rooturl(), 'people', 'vap')
         > returns: https://tap-api-v2.proofpoint.com/v2/people/vap
 
-    get('pp', 'siem', 'all')
+    ex. get('pp', 'siem', 'all')
         2) call('pp','siem')
             helper(evoke('pp', 'siem'))
                 helper('siem')
