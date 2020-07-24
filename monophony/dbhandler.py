@@ -1,8 +1,8 @@
 import sqlite3
 import json
-import sys
 import re
-from getpass import getuser # TODO move this & extend
+# TODO move this & extend
+from getpass import getuser
 from api import get
 
 
@@ -35,7 +35,7 @@ def purge():
     conn.close()
 
 
-#TODO the below functions need to be refactored. The code should be more 'code to generate code'.
+# TODO the below functions need to be refactored. The code should be more 'code to generate code'.
 
 
 def get_request(req):
@@ -56,7 +56,6 @@ def people(ep, *args):
     if c.fetchone()[0]!=1:
         c.execute("CREATE TABLE {} (guid TEXT, email TEXT, data JSON)".format(ep))
 
-    req = ('pp', 'people', ep, args)
     m = get('pp','people', ep , args)
     d = json.loads(m.text)
 
@@ -65,13 +64,13 @@ def people(ep, *args):
 
     for i in d['users']:
         c.execute("insert into {} values (?, ?, ?)".format(ep),
-            [i['identity']['guid'], i['identity']['emails'][0], json.dumps(i)]
-        )
+                  [i['identity']['guid'], i['identity']['emails'][0],
+                   json.dumps(i)])
         conn.commit()
     conn.close()
 
 
-def siem(ep,*args):
+def siem(ep, *args):
     conn, c = access()
 
     try:
@@ -93,6 +92,6 @@ def siem(ep,*args):
 
     for i in d[ep]:
         c.execute("insert into {} values (?, ?, ?)".format(ep),
-                  [ i['GUID'], ''.join(i['fromAddress']), json.dumps(i)])
+                  [i['GUID'], ''.join(i['fromAddress']), json.dumps(i)])
         conn.commit()
     conn.close()

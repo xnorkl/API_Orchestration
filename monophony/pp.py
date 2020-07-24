@@ -1,5 +1,4 @@
 from enum import Enum
-
 from utils.extra import lasthour
 
 # Enumerate Proofpoint APIs and API calls.
@@ -142,9 +141,9 @@ def forensics(t=True, i=False):
         forensic data for the individual threat are returned.
     """
     if t:
-        return { 'threatId': threatid(), 'includeCampaignForensics': i }
+        return {'threatId': threatid(), 'includeCampaignForensics': i}
     else:
-        return { 'campaignID' : campaignid() }
+        return {'campaignID': campaignid()}
 
 
 def campaign():

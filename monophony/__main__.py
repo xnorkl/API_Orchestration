@@ -1,12 +1,15 @@
-import dbhandler as db
+import eshandler as es
+
 
 def main():
     # TODO Main should read from a config file take arguments.
-    db.people('vap', 14)
-    db.siem(ep='clicksBlocked')
-    db.siem(ep='clicksPermitted')
-    db.siem(ep='messagesBlocked')
-    db.siem(ep='messagesDelivered')
+    print("hello")
+    es.people('vap', 14)
+    es.siem(ep='clicksBlocked')
+    es.siem(ep='clicksPermitted')
+    es.siem(ep='messagesBlocked')
+    es.siem(ep='messagesDelivered')
+    es.forensics(ep='forensics')
 
 
 if __name__ == "__main__":
