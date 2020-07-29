@@ -26,7 +26,14 @@ def buildurl(m, p, q):
     return '/'.join((rooturl(m)(), p, q))
 
 
-def get(app, api, endpoint, *args):
+def url(m, p=[]):
+    """
+    Improved on buildurl. Takes a rooturl and a list of non-empty strings.
+    """
+    return '/'.join((rooturl(m)(), *list(filter(None, p))))
+
+
+def get(app, api, endpoint, *args, auth='Basic'):
     """
     Takes an app, api, and args (where needed). Returns a GET request.
 
@@ -42,11 +49,26 @@ def get(app, api, endpoint, *args):
       Use <app>.<Name>.<Endpoint>.value
 
     """
-    return requests.get(
-        buildurl(app, api, endpoint),
-        params=call(app, api, args),
-        auth=(config.PP_KEY, config.PP_SEC)
-    )
+    if auth == 'Basic':
+        return requests.get(
+            url(app, [api, endpoint]),
+            params=call(app, api, args),
+            auth=(config.PP_KEY, config.PP_SEC)
+        )
+    else:
+        tid, jwt = evoke(app, api)
+        header = {
+            'Authorization': 'Bearer {}'.format(jwt),
+            'X-Tenant-ID': '{}'.format(tid)}
+        return requests.get(
+            url(app, [api, endpoint]),
+            headers=header)
+
+
+def post(app, payload):
+    return requests.post(
+        url(app),
+        data=payload)
 
 
 """

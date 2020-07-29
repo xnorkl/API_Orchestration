@@ -16,7 +16,7 @@ context.verify_mode = ssl.CERT_NONE
 user = config.ES_USR
 pswd = config.ES_SEC
 
-es = Elasticsearch([{'host': '192.168.164.113', 'port': '9200'}],
+es = Elasticsearch([{'host': '192.168.164.115', 'port': '9200'}],
                    scheme="https",
                    verify_certs=False,
                    ssl_context=context,
@@ -30,7 +30,6 @@ def people(ep, *args):
     And takes the Response and sends a POST Request to Elastic Search.
     '''
     req = get('pp', 'people', ep, args)
-    print(req)
     d = json.loads(req.text)
     if d:
 
@@ -51,7 +50,7 @@ def siem(ep, *args):
     '''
     endp = re.sub(r'(messages)|(clicks)', r'\1\2/', ep).lower()
     req = get('pp', 'siem', endp)
-    print(req)
+    print(req.url)
 
     d = json.loads(req.text)
     print(d)
@@ -70,14 +69,25 @@ def forensics(ep):
     Creates a GEt Request for the PP SIEM API Endpoint
     And takes the Response and sends a POST Request to Elastic Search.
     '''
-    req = get('pp', ep, '')
-    print(req)
 
-    d = json.loads(req.text)
-    print(d)
+    q = es.search(
+        index='*_messagesblocked',
+        body={
+            'query': {
+                'match_all': {
+                }
+            }
+        }
+    )
+
+    t_ids = set([
+        d['_source']['threatsInfoMap'][0]['threatID']
+        for d in q['hits']['hits']
+        ])
+    doc = []
+    for t_id in t_ids:
+        req = get('pp', ep, None, t_id)
+        d = json.loads(req.text)
+        doc.append(d)
     if d:
-        docs = []
-        for e in d['forensics']:
-            docs.append(e)
-
-        helpers.bulk(es, docs, index='pp_{}'.format(ep).lower())
+        helpers.bulk(es, doc, index='pp_{}'.format(ep).lower())

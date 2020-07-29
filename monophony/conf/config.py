@@ -16,3 +16,9 @@ ES_SEC = environ.get('ELASTIC_PASS')
 PP_URL = 'https://tap-api-v2.proofpoint.com/v2'
 PP_KEY = environ.get('PROOFPOINT_API_KEY')
 PP_SEC = environ.get('PROOFPOINT_API_SECRET')
+
+
+# Sophos Config
+SO_JWT = 'https://id.sophos.com/api/v2/'
+SO_KEY = environ.get('SOPHOS_API_KEY')
+SO_SEC = environ.get('SOPHOS_API_SECRET')

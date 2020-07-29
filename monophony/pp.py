@@ -1,6 +1,13 @@
 from enum import Enum
 from utils.extra import lasthour
 
+
+'''
+Proofpoint Threat Insight Dashboard Exposes 4 APIs.
+The APIs and the specific arguments to build a payload are defined here.
+MTA logs are also exposed via a syslog forwarder for a price from PP.
+'''
+
 # Enumerate Proofpoint APIs and API calls.
 # Enumerators are used similar to Haskell records.
 # These may be removed for tuples or dicts...
@@ -23,16 +30,6 @@ SIEM = Enum('SIEM', {'Clicksblocked': 'clicks/blocked',
 
 def rooturl():
     return 'https://tap-api-v2.proofpoint.com/v2'
-
-
-def threatid():
-    # TODO: This needs to pull from a db to be effective.
-    pass
-
-
-def campaignid():
-    # TODO: This needs to pull from a db to be effective.
-    pass
 
 
 def siem(i=lasthour(), f='json', t='url', s='active'):
@@ -118,7 +115,7 @@ def people(w=90, s=1000, p=1):
     }
 
 
-def forensics(t=True, i=False):
+def forensics(t_id, t=True, i=False):
     """ Fetch forensic information for a given threat or campaign.
 
     Required:
@@ -141,11 +138,7 @@ def forensics(t=True, i=False):
         forensic data for the individual threat are returned.
     """
     if t:
-        return {'threatId': threatid(), 'includeCampaignForensics': i}
+        return {'threatId': t_id, 'includeCampaignForensics': i}
     else:
-        return {'campaignID': campaignid()}
-
-
-def campaign():
-    """ Returns a campaign ID. """
-    return campaignid()
+        # TODO This will need to be worked on at a later date.
+        return {'campaignID': t_id}
