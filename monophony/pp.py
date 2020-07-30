@@ -5,18 +5,16 @@ from utils.extra import lasthour
 '''
 Proofpoint Threat Insight Dashboard Exposes 4 APIs.
 The APIs and the specific arguments to build a payload are defined here.
-MTA logs are also exposed via a syslog forwarder for a price from PP.
+The API calls use Basic Authorization.
 '''
 
+
 # Enumerate Proofpoint APIs and API calls.
-# Enumerators are used similar to Haskell records.
-# These may be removed for tuples or dicts...
 Api = Enum('Api', {'SIEM': 'siem',
                    'People': 'people',
                    'Foresnics': 'forensics',
                    'Campaign': 'campaign'})
 
-# TODO This needs to be handled differently....
 SIEM = Enum('SIEM', {'Clicksblocked': 'clicks/blocked',
                      'Clickspermitted': 'clicks/permitted',
                      'Messagesblocked': 'messages/blocked',

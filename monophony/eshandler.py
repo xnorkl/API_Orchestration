@@ -24,12 +24,16 @@ es = Elasticsearch([{'host': '192.168.164.115', 'port': '9200'}],
                    http_auth=(user, pswd))
 
 
+# Proofpoint API calls
+
+
 def people(ep, *args):
     '''
     Creates a GET Request for the PP People API Endpoint
     And takes the Response and sends a POST Request to Elastic Search.
     '''
     req = get('pp', 'people', ep, args)
+    # Note: Requests formats JSON unusually, so cast to text then us json loads
     d = json.loads(req.text)
     if d:
 
@@ -48,19 +52,10 @@ def siem(ep, *args):
     Creates a GET Request for the PP SIEM API Endpoint
     And takes the Response and sends a POST Request to Elastic Search.
     '''
-    endp = re.sub(r'(messages)|(clicks)', r'\1\2/', ep).lower()
-    req = get('pp', 'siem', endp)
-    print(req.url)
-
-    d = json.loads(req.text)
-    print(d)
-    if d:
-
-        # Send data to elasticsearch if populated
-        docs = []
-        for e in d[ep]:
-            docs.append(e)
-
+    endpoint = re.sub(r'(messages)|(clicks)', r'\1\2/', ep).lower()
+    d = json.loads(get('pp', 'siem', endpoint).text)[ep]
+    docs = [e for e in d if e]
+    if docs:
         helpers.bulk(es, docs, index='pp_{}'.format(ep).lower())
 
 
@@ -70,6 +65,7 @@ def forensics(ep):
     And takes the Response and sends a POST Request to Elastic Search.
     '''
 
+    # Query for all messages blocked.
     q = es.search(
         index='*_messagesblocked',
         body={
@@ -79,15 +75,46 @@ def forensics(ep):
             }
         }
     )
-
-    t_ids = set([
+    # Pull all the threatIDs from query, cast as set to remove duplicates.
+    threat_ids = set([
         d['_source']['threatsInfoMap'][0]['threatID']
         for d in q['hits']['hits']
         ])
-    doc = []
-    for t_id in t_ids:
-        req = get('pp', ep, None, t_id)
-        d = json.loads(req.text)
-        doc.append(d)
-    if d:
+
+    # If there is a threat it, call forensics endpoint.
+    # Store response in doc list.
+    doc = [json.loads(get('pp', ep, None, threat).text)
+           for threat in threat_ids if threat]
+    # for threat in threat_ids:
+    #    req = get('pp', ep, None, threat)
+    #    d = json.loads(req.text)
+    #    doc.append(d)
+
+    # doc is not empty, bulk upload to elastic search
+    if doc:
         helpers.bulk(es, doc, index='pp_{}'.format(ep).lower())
+
+
+# Sophos API calls
+
+
+def endpoints():
+    for n in tenants():
+        tid, host = tenants().get(n)
+        res = get('sophos', 'Tenant', tenant=tid)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

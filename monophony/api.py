@@ -33,7 +33,7 @@ def url(m, p=[]):
     return '/'.join((rooturl(m)(), *list(filter(None, p))))
 
 
-def get(app, api, endpoint, *args, auth='Basic'):
+def get(app, api, endpoint, *args, tenant=None):
     """
     Takes an app, api, and args (where needed). Returns a GET request.
 
@@ -41,28 +41,22 @@ def get(app, api, endpoint, *args, auth='Basic'):
     ----------
     app: str
       The application name. Use app.<Name>.value if string is not known.
-    api: str
+    api: str:
       The api name for a given application.
       Use <app>.Api.value if string is not known.
     endpoint: str
       The endpoint of a given api.
       Use <app>.<Name>.<Endpoint>.value
-
     """
-    if auth == 'Basic':
+
+    if tenant:
         return requests.get(
             url(app, [api, endpoint]),
-            params=call(app, api, args),
-            auth=(config.PP_KEY, config.PP_SEC)
-        )
-    else:
-        tid, jwt = evoke(app, api)
-        header = {
-            'Authorization': 'Bearer {}'.format(jwt),
-            'X-Tenant-ID': '{}'.format(tid)}
-        return requests.get(
-            url(app, [api, endpoint]),
-            headers=header)
+            headers=evoke(app, 'headers')(api, tenant))
+    return requests.get(
+        url(app, [api, endpoint]),
+        params=call(app, api, args),
+        auth=(config.PP_KEY, config.PP_SEC))
 
 
 def post(app, payload):
