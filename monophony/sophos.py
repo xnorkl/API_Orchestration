@@ -67,7 +67,8 @@ def headers(api, identity):
 def tenants():
 
     Tenant = nt('Tenant', ['id', 'apiHost'])
-    response = requests.get(rooturl() + '/organization/v1/tenants',
+    orgurl = 'https://api.central.sophos.com/organization/v1/tenants'
+    response = requests.get(orgurl,
                             headers=headers('Organization', whoami())
                             ).json()['items']
 
@@ -77,10 +78,38 @@ def tenants():
     return dict((d['name'], tenant(d)) for d in response)
 
 
+# TODO Merge this with API Module Get function...
+def api_endpoint(api, ep):
+    responses = []
+    for t in tenants().items():
+        res = requests.get(t[1].apiHost + '/{}/v1/{}'.format(api, ep),
+                           headers=headers('Tenant', t[1].id)).json()
+        responses.append(res)
+    return responses
+#    res = []
+#    for n in tenants:
+#        res.append(requests.get( + '/{}/v1/{}',
+#                               headers=headers('Tenant', tid)
+#                               ).json())
+#    return res
+
+
+# TODO These will be moved to eshandler.
 def endpoints(n):
     tid, host = tenants().get(n)
     return requests.get(host + '/endpoint/v1/endpoints',
                         headers=headers('Tenant', tid)).json()
 
 
-print(endpoints('Mon Health Medical Center'))
+def alerts(n):
+    endpoint = '/common/v1/alerts'
+    tid, host = tenants().get(n)
+    return requests.get(host + endpoint,
+                        headers=headers('Tenant', tid)).json()
+
+
+def users(n):
+    endpoint = '/common/v1/directory/users'
+    tid, host = tenants().get(n)
+    return requests.get(host + endpoint,
+                        headers=headers('Tenant', tid)).json()

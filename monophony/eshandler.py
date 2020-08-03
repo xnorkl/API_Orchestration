@@ -2,7 +2,7 @@ import json
 import conf.config as config
 from elasticsearch import Elasticsearch, helpers
 from elasticsearch.connection import create_ssl_context
-from api import get
+from api import get, call, evoke
 import re
 import ssl
 
@@ -99,9 +99,11 @@ def forensics(ep):
 
 
 def endpoints():
+    
     for n in tenants():
         tid, host = tenants().get(n)
-        res = get('sophos', 'Tenant', tenant=tid)
+        return get('sophos', 'tenant', tenant=tid)
+
 
 
 
