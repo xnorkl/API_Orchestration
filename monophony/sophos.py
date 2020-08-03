@@ -86,12 +86,6 @@ def api_endpoint(api, ep):
                            headers=headers('Tenant', t[1].id)).json()
         responses.append(res)
     return responses
-#    res = []
-#    for n in tenants:
-#        res.append(requests.get( + '/{}/v1/{}',
-#                               headers=headers('Tenant', tid)
-#                               ).json())
-#    return res
 
 
 # TODO These will be moved to eshandler.
