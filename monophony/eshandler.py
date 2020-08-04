@@ -3,6 +3,7 @@ import conf.config as config
 from elasticsearch import Elasticsearch, helpers
 from elasticsearch.connection import create_ssl_context
 from api import get, evoke_api
+from time import sleep
 import re
 import ssl
 from pprint import pp
@@ -14,10 +15,8 @@ context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
 user = config.ES_USR
-pswd = config.ES_SEC
-
-def checkauth():
-    print(user, pswd)
+#pswd = config.ES_SEC
+pswd = "K7kgVp2GvgBCTQ7"
 
 es = Elasticsearch([{'host': '172.26.5.162', 'port': '9200'}],
                    scheme="https",
@@ -87,7 +86,7 @@ def forensics(ep):
     # If there is a threat it, call forensics endpoint.
     # Store response in doc list.
     doc = [json.loads(get('pp', ep, None, threat).text)
-           for threat in threat_ids if threathreat]
+           for threat in threat_ids if threat]
     # for threat in threat_ids:
     #    req = get('pp', ep, None, threat)
     #    d = json.loads(req.text)
@@ -106,10 +105,10 @@ def so_endpoints():
     Collects endpoints across all tenants within the default time frame.
     Returns an ElasticSearch document which is injested by ES.
 
-    Sophos does not expose this api at the global level, instead the endpoint API
-    can only return endpoints for a given tenant. Each tenant has an ID which must
-    be authenticated against in order to prove the tenant is associated with a
-    a given Orgnization ID.
+    Sophos does not expose this api at the global level,
+    instead the endpoint API can only return endpoints for a given tenant.
+    Each tenant has an ID which must be authenticated against in order
+    to prove the tenant is associated with a given Orgnization ID.
 
     Authentication is handled in the Sophos module.
     '''
@@ -126,14 +125,18 @@ def so_endpoints():
     responses = [endpoints(sites.get(s)) for s in sites]
 
     # Get a list of data on each endpoint.
+    # TODO: Fields can be cleaned up.
+    doc = []
     for r in responses:
-        doc = []
         if r.status_code == 200:
             d = json.loads(r.text)
-            data = {}
             for i in d['items']:
+                # data = {}
                 hostname = i.pop('hostname')
-                data[hostname] = i
-                doc.append(data)
-
-            helpers.bulk(es, doc, index='so_endpoints_test')
+                # data[hostname] = i
+                doc.append({'hostname': hostname, 'data': i})
+    try:
+        helpers.bulk(es, doc, index='so_endpoints')
+    except Exception as e:
+        print(e)
+    sleep(1)
