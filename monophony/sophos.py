@@ -15,6 +15,8 @@ The API calls use Oauth v2.
 Api = Enum('Api', {'Common': 'common',
                    'Endpoint': 'endpoint',
                    'Organizaion': 'organization',
+                   'Tenant': 'tenant',
+                   'Tenants': 'tenants',
                    'Whoami': 'whoami'})
 
 Common = Enum('Common', {'Alerts': 'common/v1/alerts',
@@ -27,14 +29,17 @@ def rooturl():
     # TODO this is hardcoded and should be dynamic...
     return 'https://api-us03.central.sophos.com'
 
+def tenant():
+    return 'endpoint/v1/endpoints?pageSize=500'
+
 
 # Hand tokens here
 def jwt():
     '''
-    Calls Sophos oauth api and requests a JWT.
+    Calls Sophos Oauth API and requests a JWT.
     Returns the JWT if request is granted.
     '''
-    # TODO Encrype JWT
+    # TODO Encrypt JWT
     header = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -52,6 +57,11 @@ def jwt():
     return token
 
 
+def headers(api, identity):
+    return {'Authorization': 'Bearer {}'.format(jwt()),
+            'X-{}-ID'.format(api): identity}
+
+
 def whoami():
     globalurl = 'https://api.central.sophos.com'
     return requests.get(globalurl + '/whoami/v1',
@@ -59,28 +69,24 @@ def whoami():
                         ).json()['id']
 
 
-def headers(api, identity):
-    return {'Authorization': 'Bearer {}'.format(jwt()),
-            'X-{}-ID'.format(api): identity}
-
-
 def tenants():
-
+    '''
+    Returns a dictionary containing tenant name as k,
+    and namedtuple Tenant(id, apiHost) as v.
+    '''
+    # API host is currently not being used, but it could make for cleaner code.
     Tenant = nt('Tenant', ['id', 'apiHost'])
-    response = requests.get(rooturl() + '/organization/v1/tenants',
+    response = requests.get('https://api.central.sophos.com/organization/v1/tenants',
                             headers=headers('Organization', whoami())
                             ).json()['items']
 
     def tenant(d):
+        '''
+        Takes a response and returns a named tuple.
+        '''
         return Tenant(d['id'], d['apiHost'])
 
     return dict((d['name'], tenant(d)) for d in response)
 
 
-def endpoints(n):
-    tid, host = tenants().get(n)
-    return requests.get(host + '/endpoint/v1/endpoints',
-                        headers=headers('Tenant', tid)).json()
 
-
-print(endpoints('Mon Health Medical Center'))

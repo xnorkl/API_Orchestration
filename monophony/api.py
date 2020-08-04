@@ -28,9 +28,10 @@ def buildurl(m, p, q):
 
 def url(m, p=[]):
     """
-    Improved on buildurl. Takes a rooturl and a list of non-empty strings.
+    Improved on buildurl. Takes a rooturl and a list of non-empty strings
     """
-    return '/'.join((rooturl(m)(), *list(filter(None, p))))
+    l = [evoke_api(m, x) for x in p if x]
+    return '/'.join((rooturl(m)(), *l))
 
 
 def get(app, api, endpoint, *args, tenant=None):
@@ -52,7 +53,7 @@ def get(app, api, endpoint, *args, tenant=None):
     if tenant:
         return requests.get(
             url(app, [api, endpoint]),
-            headers=evoke(app, 'headers')(api, tenant))
+            headers=evoke(app, 'headers')(api.capitalize(), tenant))
     return requests.get(
         url(app, [api, endpoint]),
         params=call(app, api, args),

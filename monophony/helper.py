@@ -1,4 +1,5 @@
 import pp
+import sophos
 
 # Higher Order Functions
 def isiterable(obj):
