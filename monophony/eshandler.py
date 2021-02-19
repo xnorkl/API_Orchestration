@@ -15,10 +15,9 @@ context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
 user = config.ES_USR
-#pswd = config.ES_SEC
-pswd = "K7kgVp2GvgBCTQ7"
+pswd = config.ES_SEC
 
-es = Elasticsearch([{'host': '172.26.5.162', 'port': '9200'}],
+es = Elasticsearch([{'host': '<ip>', 'port': '9200'}],
                    scheme="https",
                    verify_certs=False,
                    ssl_context=context,
